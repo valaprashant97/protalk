@@ -4,6 +4,9 @@
 > **AI-powered English communication and interview practice for students and aspiring professionals.**
 
 ProTalk is a Flutter-based mobile application designed to help students improve **English communication, speaking confidence, professional communication, and interview readiness** through interactive AI-powered practice sessions.
+> **AI-powered English communication and interview practice for students and aspiring professionals.**
+
+ProTalk is a Flutter-based mobile application designed to help students improve **English communication, speaking confidence, professional communication, and interview readiness** through interactive AI-powered practice sessions.
 
 The application combines conversational practice, simulated interviews, voice interaction, personalized AI responses, session history, and performance feedback in a single training platform.
 
@@ -846,6 +849,3 @@ Add the appropriate open-source license here if the project is later published f
 ## ⭐ ProTalk
 
 **Build confidence. Practice communication. Prepare for the real world.**
-
-
-----
