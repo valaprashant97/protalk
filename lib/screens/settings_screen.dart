@@ -413,45 +413,7 @@ class SettingsScreen extends GetView<SettingsController> {
                       ),
                     );
                   }),
-
-                  const SizedBox(height: 24),
-
-                  // Engine & Voice Details Card
-                  _buildSectionContainer(
-                    context: context,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'ENGINE & LOCALE DETAILS',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 1.1,
-                            color: AppColors.getTextMuted(context),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Obx(() {
-                          final voice = controller.activeVoice;
-                          final voiceName = voice['name'] ?? 'System Default TTS Voice';
-                          final locale = voice['locale'] ?? voice['language'] ?? 'en-US';
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildDetailRow(context, 'Voice:', voiceName),
-                              const SizedBox(height: 8),
-                              _buildDetailRow(context, 'Language:', locale),
-                            ],
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 32),
-                ],
+                    ],
               ),
             ),
           ),

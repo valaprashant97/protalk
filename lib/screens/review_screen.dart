@@ -162,11 +162,11 @@ class ReviewScreen extends GetView<ReviewController> {
             SizedBox(
               width: 90,
               height: 90,
-                child: Lottie.asset(
-                  'assets/animations/loading.json',
-                  fit: BoxFit.contain,
-                  repeat: true,
-                ),
+              child: Lottie.asset(
+                'assets/animations/loading.json',
+                fit: BoxFit.contain,
+                repeat: true,
+              ),
             ),
             const SizedBox(height: 18),
             Text(

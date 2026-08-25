@@ -909,7 +909,7 @@ class ChatScreen extends GetView<ChatController> {
               elevation: 0,
               insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 360),
+                constraints: const BoxConstraints(maxWidth: 310),
                 decoration: BoxDecoration(
                   color: (isDark ? const Color(0xFF0D0F15) : Colors.white).withValues(alpha: 0.60),
                   borderRadius: BorderRadius.circular(20),
@@ -925,14 +925,14 @@ class ChatScreen extends GetView<ChatController> {
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.fromLTRB(22, 24, 22, 20),
+                padding: const EdgeInsets.fromLTRB(18, 20, 18, 16),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Top Icon Badge
                     Container(
-                      width: 48,
-                      height: 48,
+                      width: 40,
+                      height: 40,
                       decoration: BoxDecoration(
                         color: isAvailable
                             ? (isDark ? const Color(0xFF1E293B) : const Color(0xFFEEF2F6))
@@ -947,13 +947,13 @@ class ChatScreen extends GetView<ChatController> {
                       ),
                       child: Icon(
                         isAvailable ? Icons.check_outlined : Icons.warning,
-                        size: 24,
+                        size: 20,
                         color: isAvailable
                             ? (isDark ? const Color(0xFF93C5FD) : const Color(0xFF2563EB))
                             : (isDark ? const Color(0xFFFCA5A5) : const Color(0xFFDC2626)),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 12),
 
                     // Dialog Title
                     Text(
@@ -961,12 +961,12 @@ class ChatScreen extends GetView<ChatController> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontWeight: FontWeight.w800,
-                        fontSize: 17,
+                        fontSize: 16,
                         color: AppColors.getTextPrimary(context),
                         letterSpacing: -0.3,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
 
                     // Concise Message
                     Text(
@@ -975,12 +975,12 @@ class ChatScreen extends GetView<ChatController> {
                           : 'You need at least 5 messages for AI review ($count/5 completed).',
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 12.5,
                         color: AppColors.getTextSecondary(context),
-                        height: 1.35,
+                        height: 1.3,
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 10),
 
                     // Message Count Pill
                     Container(
@@ -1009,7 +1009,7 @@ class ChatScreen extends GetView<ChatController> {
                                 ? '$count messages completed'
                                 : '${5 - count} more needed',
                             style: TextStyle(
-                              fontSize: 11.5,
+                              fontSize: 11,
                               fontWeight: FontWeight.w600,
                               color: AppColors.getTextSecondary(context),
                             ),
@@ -1017,7 +1017,7 @@ class ChatScreen extends GetView<ChatController> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 22),
+                    const SizedBox(height: 16),
 
                     // Action Buttons
                     Row(
@@ -1042,12 +1042,12 @@ class ChatScreen extends GetView<ChatController> {
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(11),
                               ),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
                             ),
                             child: Text(
                               isAvailable ? 'Keep Chatting' : 'Exit Session',
                               style: TextStyle(
-                                fontSize: 12.5,
+                                fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: !isAvailable
                                     ? Colors.redAccent
@@ -1081,7 +1081,7 @@ class ChatScreen extends GetView<ChatController> {
                                     ? const BorderSide(color: Color(0xFF333B50))
                                     : BorderSide.none,
                               ),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              padding: const EdgeInsets.symmetric(vertical: 10),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -1089,7 +1089,7 @@ class ChatScreen extends GetView<ChatController> {
                                 Text(
                                   isAvailable ? 'Generate Review' : 'Continue Chat',
                                   style: TextStyle(
-                                    fontSize: 12.5,
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w700,
                                     color: isDark ? const Color(0xFFE2E8F0) : Colors.white,
                                   ),
