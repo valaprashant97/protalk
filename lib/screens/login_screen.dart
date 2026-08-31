@@ -194,7 +194,7 @@ class LoginScreen extends GetView<LoginController> {
                     return ElevatedButton(
                       onPressed: isLoading ? null : controller.login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isDark ? const Color(0xFF222736) : Colors.black,
+                        backgroundColor: isDark ? const Color(0xFF222736) : const Color(0xFF242936),
                         foregroundColor: isDark ? const Color(0xFFE2E8F0) : Colors.white,
                         disabledBackgroundColor: isDark
                             ? const Color(0xFF1B1E29)
@@ -204,7 +204,7 @@ class LoginScreen extends GetView<LoginController> {
                           borderRadius: BorderRadius.circular(12),
                           side: isDark
                               ? const BorderSide(color: Color(0xFF333B50))
-                              : BorderSide.none,
+                              : const BorderSide(color: Color(0xFF384054)),
                         ),
                         elevation: 0,
                       ),

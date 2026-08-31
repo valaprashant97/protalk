@@ -260,11 +260,11 @@ class ReviewScreen extends GetView<ReviewController> {
                   ElevatedButton(
                     onPressed: controller.resumeChat,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isDark ? const Color(0xFF222736) : Colors.black,
+                      backgroundColor: isDark ? const Color(0xFF222736) : const Color(0xFF242936),
                       foregroundColor: isDark ? const Color(0xFFE2E8F0) : Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: isDark ? const BorderSide(color: Color(0xFF333B50)) : BorderSide.none,
+                        side: isDark ? const BorderSide(color: Color(0xFF333B50)) : const BorderSide(color: Color(0xFF384054)),
                       ),
                     ),
                     child: const Text('Remaining Chat'),
@@ -417,11 +417,11 @@ class ReviewScreen extends GetView<ReviewController> {
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: isDark ? const Color(0xFF222736) : Colors.black,
+                          backgroundColor: isDark ? const Color(0xFF222736) : const Color(0xFF242936),
                           foregroundColor: isDark ? const Color(0xFFE2E8F0) : Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
-                            side: isDark ? const BorderSide(color: Color(0xFF333B50)) : BorderSide.none,
+                            side: isDark ? const BorderSide(color: Color(0xFF333B50)) : const BorderSide(color: Color(0xFF384054)),
                           ),
                           elevation: 0,
                         ),
@@ -511,8 +511,8 @@ class ReviewScreen extends GetView<ReviewController> {
       performanceTier = 'Proficient';
     }
 
-    final cardBg = isDark ? const Color(0xFF1B1F2C) : const Color(0xFF0F172A);
-    final cardBorder = isDark ? const Color(0xFF2E3547) : const Color(0xFF0F172A);
+    final cardBg = isDark ? const Color(0xFF1B1F2C) : AppColors.getSurface(context);
+    final cardBorder = isDark ? const Color(0xFF2E3547) : AppColors.getBorder(context);
 
     return Container(
       width: double.infinity,
@@ -523,7 +523,7 @@ class ReviewScreen extends GetView<ReviewController> {
         border: Border.all(color: cardBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
+            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
             blurRadius: 16,
             offset: const Offset(0, 4),
           ),
@@ -534,10 +534,10 @@ class ReviewScreen extends GetView<ReviewController> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF242A3B) : const Color(0xFF262B3B),
+              color: isDark ? const Color(0xFF242A3B) : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isDark ? const Color(0xFF38425C) : Colors.white12,
+                color: isDark ? const Color(0xFF38425C) : const Color(0xFFE2E8F0),
               ),
             ),
             child: Text(
@@ -545,7 +545,7 @@ class ReviewScreen extends GetView<ReviewController> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: isDark ? const Color(0xFFE2E8F0) : Colors.white,
+                color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A),
                 letterSpacing: 0.5,
               ),
             ),
@@ -555,7 +555,7 @@ class ReviewScreen extends GetView<ReviewController> {
             'Overall Score',
             style: TextStyle(
               fontSize: 14,
-              color: isDark ? const Color(0xFF94A3B8) : Colors.white.withValues(alpha: 0.7),
+              color: isDark ? const Color(0xFF94A3B8) : AppColors.getTextSecondary(context),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -565,7 +565,7 @@ class ReviewScreen extends GetView<ReviewController> {
             style: TextStyle(
               fontSize: 40,
               fontWeight: FontWeight.w900,
-              color: isDark ? const Color(0xFFE2E8F0) : Colors.white,
+              color: isDark ? const Color(0xFFE2E8F0) : AppColors.getTextPrimary(context),
               letterSpacing: -1,
             ),
           ),
@@ -575,7 +575,7 @@ class ReviewScreen extends GetView<ReviewController> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12,
-              color: isDark ? const Color(0xFF64748B) : Colors.white.withValues(alpha: 0.6),
+              color: isDark ? const Color(0xFF64748B) : AppColors.getTextSecondary(context),
             ),
           ),
         ],
@@ -635,7 +635,7 @@ class ReviewScreen extends GetView<ReviewController> {
               minHeight: 6,
               backgroundColor: isDark ? const Color(0xFF222736) : AppColors.getBorder(context),
               valueColor: AlwaysStoppedAnimation<Color>(
-                isDark ? const Color(0xFFCBD5E1) : Colors.black,
+                isDark ? const Color(0xFFCBD5E1) : const Color(0xFF0F172A),
               ),
             ),
           ),
@@ -657,7 +657,7 @@ class ReviewScreen extends GetView<ReviewController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            Icons.check_circle_rounded,
+            Icons.verified_outlined,
             color: AppColors.getTextPrimary(context),
             size: 20,
           ),
@@ -691,7 +691,7 @@ class ReviewScreen extends GetView<ReviewController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            Icons.info_outline_rounded,
+            Icons.insights_sharp,
             size: 20,
             color: AppColors.getTextPrimary(context),
           ),
@@ -732,7 +732,7 @@ class ReviewScreen extends GetView<ReviewController> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF191D28) : const Color(0xFFF8F9FA),
+        color: isDark ? const Color(0xFF191D28) : AppColors.getSurface(context),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isDark ? const Color(0xFF282F40) : AppColors.getBorder(context),

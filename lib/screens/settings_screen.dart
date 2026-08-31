@@ -125,10 +125,10 @@ class SettingsScreen extends GetView<SettingsController> {
                   const SizedBox(height: 24),
 
                   // ========================================================
-                  // 2. VOICE & SPEECH SETTINGS SECTION
+                  // 2. VOICE & AUDIO SECTION
                   // ========================================================
                   Text(
-                    'VOICE & SPEECH',
+                    'VOICE & AUDIO',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
@@ -138,7 +138,7 @@ class SettingsScreen extends GetView<SettingsController> {
                   ),
                   const SizedBox(height: 12),
 
-                  // Voice Gender Card
+                  // Voice Persona Card
                   _buildSectionContainer(
                     context: context,
                     child: Column(
@@ -164,7 +164,7 @@ class SettingsScreen extends GetView<SettingsController> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Select preferred AI voice gender',
+                          'Select your preferred AI coach voice persona',
                           style: TextStyle(
                             fontSize: 13,
                             color: AppColors.getTextSecondary(context),
@@ -172,62 +172,29 @@ class SettingsScreen extends GetView<SettingsController> {
                         ),
                         const SizedBox(height: 16),
                         Obx(() {
-                          final selected = controller.voiceGender.value;
+                          final currentVoice = controller.voiceGender.value;
                           return Row(
                             children: [
                               Expanded(
                                 child: _buildVoiceOption(
                                   context: context,
-                                  label: 'Female Voice',
-                                  icon: Icons.female_rounded,
-                                  isSelected: selected == 'female',
-                                  onTap: () => controller.setGender('female'),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _buildVoiceOption(
-                                  context: context,
                                   label: 'Male Voice',
                                   icon: Icons.male_rounded,
-                                  isSelected: selected == 'male',
+                                  isSelected: currentVoice == 'male',
                                   onTap: () => controller.setGender('male'),
                                 ),
                               ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: _buildVoiceOption(
+                                  context: context,
+                                  label: 'Female Voice',
+                                  icon: Icons.female_rounded,
+                                  isSelected: currentVoice == 'female',
+                                  onTap: () => controller.setGender('female'),
+                                ),
+                              ),
                             ],
-                          );
-                        }),
-                        const SizedBox(height: 12),
-                        Obx(() {
-                          final label = controller.genderStatusLabel.value;
-                          final isVerified = controller.isGenderVerified.value;
-                          if (label.isEmpty) return const SizedBox.shrink();
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1F2330) : const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: AppColors.getBorder(context)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  isVerified ? Icons.verified_rounded : Icons.info_outline,
-                                  size: 15,
-                                  color: AppColors.getTextPrimary(context),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  label,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.getTextPrimary(context),
-                                  ),
-                                ),
-                              ],
-                            ),
                           );
                         }),
                       ],
@@ -267,7 +234,7 @@ class SettingsScreen extends GetView<SettingsController> {
                               () => Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF1F2330) : const Color(0xFFE2E8F0),
+                                  color: isDark ? const Color(0xFF1F2330) : const Color(0xFFF1F5F9),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -337,7 +304,7 @@ class SettingsScreen extends GetView<SettingsController> {
                               () => Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                 decoration: BoxDecoration(
-                                  color: isDark ? const Color(0xFF1F2330) : const Color(0xFFE2E8F0),
+                                  color: isDark ? const Color(0xFF1F2330) : const Color(0xFFF1F5F9),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
@@ -387,14 +354,14 @@ class SettingsScreen extends GetView<SettingsController> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: speaking
                               ? (isDark ? const Color(0xFF353D52) : const Color(0xFF334155))
-                              : (isDark ? const Color(0xFF222738) : Colors.black),
+                              : (isDark ? const Color(0xFF222738) : const Color(0xFF242936)),
                           foregroundColor: Colors.white,
                           elevation: 0,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                             side: isDark
                                 ? const BorderSide(color: Color(0xFF3B4359))
-                                : BorderSide.none,
+                                : const BorderSide(color: Color(0xFF384054)),
                           ),
                         ),
                         icon: Icon(
@@ -413,7 +380,7 @@ class SettingsScreen extends GetView<SettingsController> {
                       ),
                     );
                   }),
-                    ],
+                ],
               ),
             ),
           ),
@@ -422,57 +389,57 @@ class SettingsScreen extends GetView<SettingsController> {
 
       // 2. Top Pinned Glassmorphic App Bar (Layer 2)
       Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: ClipRect(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                child: Container(
-                  height: totalAppBarHeight,
-                  padding: EdgeInsets.only(top: topPadding),
-                  decoration: BoxDecoration(
-                    color: (isDark ? const Color(0xFF0D0F15) : Colors.white).withValues(alpha: 0.60),
-                    border: Border(
-                      bottom: BorderSide(
-                        color: AppColors.getBorder(context).withValues(alpha: 0.60),
-                        width: 1.0,
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.arrow_back_rounded,
-                          color: AppColors.getTextPrimary(context),
-                          size: 24,
-                        ),
-                        tooltip: 'Back',
-                        onPressed: () => Get.back(),
-                      ),
-                      Expanded(
-                        child: Text(
-                          'Settings',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 18,
-                            color: AppColors.getTextPrimary(context),
-                            letterSpacing: -0.3,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 48), // Equal visual spacing to balance back button
-                    ],
+        top: 0,
+        left: 0,
+        right: 0,
+        child: ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: Container(
+              height: totalAppBarHeight,
+              padding: EdgeInsets.only(top: topPadding),
+              decoration: BoxDecoration(
+                color: (isDark ? const Color(0xFF0D0F15) : Colors.white).withValues(alpha: 0.80),
+                border: Border(
+                  bottom: BorderSide(
+                    color: AppColors.getBorder(context).withValues(alpha: 0.60),
+                    width: 1.0,
                   ),
                 ),
               ),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.arrow_back_rounded,
+                      color: AppColors.getTextPrimary(context),
+                      size: 24,
+                    ),
+                    tooltip: 'Back',
+                    onPressed: () => Get.back(),
+                  ),
+                  Expanded(
+                    child: Text(
+                      'Settings',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
+                        color: AppColors.getTextPrimary(context),
+                        letterSpacing: -0.3,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 48), // Equal visual spacing to balance back button
+                ],
+              ),
             ),
           ),
-        ],
+        ),
       ),
-    );
+    ],
+  ),
+);
   }
 
   Widget _buildSectionContainer({
@@ -500,9 +467,9 @@ class SettingsScreen extends GetView<SettingsController> {
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final selectedBg = isDark ? const Color(0xFF222738) : Colors.black;
-    final selectedFg = Colors.white;
-    final selectedBorder = isDark ? const Color(0xFF475569) : Colors.black;
+    final selectedBg = isDark ? const Color(0xFF222738) : const Color(0xFFF1F5F9);
+    final selectedFg = isDark ? Colors.white : const Color(0xFF0F172A);
+    final selectedBorder = isDark ? const Color(0xFF475569) : const Color(0xFF0F172A);
 
     final unselectedBg = AppColors.getSurface(context);
     final unselectedFg = AppColors.getTextSecondary(context);
@@ -552,9 +519,9 @@ class SettingsScreen extends GetView<SettingsController> {
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final selectedBg = isDark ? const Color(0xFF222738) : Colors.black;
-    final selectedFg = Colors.white;
-    final selectedBorder = isDark ? const Color(0xFF475569) : Colors.black;
+    final selectedBg = isDark ? const Color(0xFF222738) : const Color(0xFFF1F5F9);
+    final selectedFg = isDark ? Colors.white : const Color(0xFF0F172A);
+    final selectedBorder = isDark ? const Color(0xFF475569) : const Color(0xFF0F172A);
 
     final unselectedBg = AppColors.getSurface(context);
     final unselectedFg = AppColors.getTextPrimary(context);
@@ -593,35 +560,6 @@ class SettingsScreen extends GetView<SettingsController> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildDetailRow(BuildContext context, String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 84,
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-              color: AppColors.getTextMuted(context),
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w700,
-              color: AppColors.getTextPrimary(context),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

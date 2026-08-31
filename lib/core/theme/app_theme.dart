@@ -5,15 +5,15 @@ class AppTheme {
   // BALANCED MONOCHROME PALETTES (SOFTENED DARK & CLEAN LIGHT)
   // ==========================================================================
 
-  // --- LIGHT PALETTE (Clean Minimalist White) ---
-  static const Color lightPrimary = Color(0xFF0F172A); // Slate 900
-  static const Color lightSecondary = Color(0xFF0F172A); // Slate 900
-  static const Color lightBackground = Color(0xFFFFFFFF); // Pure White
+  // --- LIGHT PALETTE (Clean Minimalist White & Softened Charcoal) ---
+  static const Color lightPrimary = Color(0xFF242936); // Softened Deep Charcoal-Slate (Low-glare black variant)
+  static const Color lightSecondary = Color(0xFF333B4F); // Muted Charcoal
+  static const Color lightBackground = Color(0xFFF8FAFC); // Slate 50 (Soft Canvas)
   static const Color lightSurface = Color(0xFFFFFFFF); // Pure White Surface
-  static const Color lightCard = Color(0xFFF8F9FA); // Soft Surface
+  static const Color lightCard = Color(0xFFF1F5F9); // Slate 100 (Secondary Surface)
   static const Color lightBorder = Color(0xFFE2E8F0); // Slate 200 Border
-  static const Color lightTextPrimary = Color(0xFF0F172A); // Slate 900
-  static const Color lightTextSecondary = Color(0xFF64748B); // Slate 500
+  static const Color lightTextPrimary = Color(0xFF1E2433); // Softened Deep Charcoal
+  static const Color lightTextSecondary = Color(0xFF475569); // Slate 600
   static const Color lightTextMuted = Color(0xFF94A3B8); // Slate 400
 
   // --- DARK PALETTE (Comfortable Softened Off-White - Reduced Harsh Glare) ---
@@ -85,6 +85,7 @@ class AppTheme {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
+            side: const BorderSide(color: Color(0xFF384054)),
           ),
           textStyle: const TextStyle(
             fontSize: 15,

@@ -134,9 +134,13 @@ class SessionSelectionScreen extends GetView<SessionSelectionController> {
   ) {
     final isDark = AppColors.isDark(context);
 
-    final cardBg = isDark ? const Color(0xFF222736) : Colors.black;
-    final cardBorder = isDark ? const Color(0xFF333B50) : Colors.black;
-    final iconBg = isDark ? const Color(0xFF2B3245) : const Color(0xFF27272A);
+    final cardBg = isDark ? const Color(0xFF222736) : AppColors.getSurface(context);
+    final cardBorder = isDark ? const Color(0xFF333B50) : AppColors.getBorder(context);
+    final iconBg = isDark ? const Color(0xFF2B3245) : AppColors.getCard(context);
+    final iconBorder = isDark ? const Color(0xFF384358) : AppColors.getBorder(context);
+    final iconColor = isDark ? Colors.white : AppColors.getTextPrimary(context);
+    final titleColor = isDark ? Colors.white : AppColors.getTextPrimary(context);
+    final descColor = isDark ? Colors.white.withValues(alpha: 0.75) : AppColors.getTextSecondary(context);
 
     return Material(
       color: Colors.transparent,
@@ -151,7 +155,7 @@ class SessionSelectionScreen extends GetView<SessionSelectionController> {
             border: Border.all(color: cardBorder, width: 1.2),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.12),
+                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
                 blurRadius: 10,
                 offset: const Offset(0, 3),
               ),
@@ -165,10 +169,11 @@ class SessionSelectionScreen extends GetView<SessionSelectionController> {
                 decoration: BoxDecoration(
                   color: iconBg,
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: iconBorder, width: 1),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.add_rounded,
-                  color: Colors.white,
+                  color: iconColor,
                   size: 24,
                 ),
               ),
@@ -177,12 +182,12 @@ class SessionSelectionScreen extends GetView<SessionSelectionController> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Create New Session',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: titleColor,
                         letterSpacing: -0.2,
                       ),
                     ),
@@ -191,7 +196,7 @@ class SessionSelectionScreen extends GetView<SessionSelectionController> {
                       'Configure a new Mock Interview or English practice',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.white.withValues(alpha: 0.75),
+                        color: descColor,
                         fontWeight: FontWeight.normal,
                       ),
                       maxLines: 1,
@@ -486,11 +491,11 @@ class SessionSelectionScreen extends GetView<SessionSelectionController> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: isDark ? const Color(0xFF222736) : Colors.black,
+              backgroundColor: isDark ? const Color(0xFF222736) : const Color(0xFF242936),
               foregroundColor: isDark ? const Color(0xFFE2E8F0) : Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
-                side: isDark ? const BorderSide(color: Color(0xFF333B50)) : BorderSide.none,
+                side: isDark ? const BorderSide(color: Color(0xFF333B50)) : const BorderSide(color: Color(0xFF384054)),
               ),
               elevation: 0,
             ),

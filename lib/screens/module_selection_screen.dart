@@ -153,19 +153,19 @@ class ModuleSelectionScreen extends GetView<ModuleSelectionController> {
       final isSelected = _controller.selectedModule.value == id;
 
       final cardBg = isSelected
-          ? (isDark ? const Color(0xFF202534) : Colors.black)
+          ? (isDark ? const Color(0xFF202534) : Colors.white)
           : AppColors.getSurface(context);
       final cardBorder = isSelected
-          ? (isDark ? const Color(0xFF384358) : Colors.black)
+          ? (isDark ? const Color(0xFF384358) : const Color(0xFF0F172A))
           : AppColors.getBorder(context);
       final titleColor = isSelected
-          ? (isDark ? const Color(0xFFE2E8F0) : Colors.white)
+          ? (isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A))
           : AppColors.getTextPrimary(context);
       final descColor = isSelected
-          ? (isDark ? const Color(0xFF94A3B8) : Colors.white.withValues(alpha: 0.8))
+          ? (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569))
           : AppColors.getTextSecondary(context);
       final iconBg = isSelected
-          ? (isDark ? const Color(0xFF2B3245) : const Color(0xFF27272A))
+          ? (isDark ? const Color(0xFF2B3245) : const Color(0xFFF1F5F9))
           : AppColors.getCard(context);
 
       return InkWell(
@@ -184,7 +184,7 @@ class ModuleSelectionScreen extends GetView<ModuleSelectionController> {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
+                      color: Colors.black.withValues(alpha: isDark ? 0.12 : 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 3),
                     ),
@@ -204,7 +204,7 @@ class ModuleSelectionScreen extends GetView<ModuleSelectionController> {
                 child: Icon(
                   icon,
                   color: isSelected
-                      ? (isDark ? const Color(0xFFE2E8F0) : Colors.white)
+                      ? (isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A))
                       : AppColors.getTextPrimary(context),
                   size: 22,
                 ),
@@ -372,9 +372,9 @@ class ModuleSelectionScreen extends GetView<ModuleSelectionController> {
             child: Row(
               children: skills.map((skill) {
                 final isSelected = _controller.selectedSkills.contains(skill);
-                final selectedBg = isDark ? const Color(0xFF242938) : Colors.black;
-                final selectedFg = isDark ? const Color(0xFFE2E8F0) : Colors.white;
-                final selectedBorder = isDark ? const Color(0xFF3B4459) : Colors.black;
+                final selectedBg = isDark ? const Color(0xFF242938) : const Color(0xFFF1F5F9);
+                final selectedFg = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+                final selectedBorder = isDark ? const Color(0xFF3B4459) : const Color(0xFF0F172A);
 
                 return Padding(
                   padding: const EdgeInsets.only(right: 8.0),
@@ -756,7 +756,7 @@ class ModuleSelectionScreen extends GetView<ModuleSelectionController> {
                 color: isError
                     ? Colors.red.shade400
                     : (hasValue
-                        ? (isDark ? const Color(0xFF384358) : Colors.black)
+                        ? (isDark ? const Color(0xFF384358) : const Color(0xFF0F172A))
                         : AppColors.getBorder(context)),
                 width: isError ? 1.5 : (hasValue ? 1.4 : 1),
               ),
@@ -847,9 +847,9 @@ class ModuleSelectionScreen extends GetView<ModuleSelectionController> {
 
     return Obx(() {
       final isSelected = selectedVal.value == label;
-      final selectedBg = isDark ? const Color(0xFF242938) : Colors.black;
-      final selectedFg = isDark ? const Color(0xFFE2E8F0) : Colors.white;
-      final selectedBorder = isDark ? const Color(0xFF3B4459) : Colors.black;
+      final selectedBg = isDark ? const Color(0xFF242938) : const Color(0xFFF1F5F9);
+      final selectedFg = isDark ? const Color(0xFFE2E8F0) : const Color(0xFF0F172A);
+      final selectedBorder = isDark ? const Color(0xFF3B4459) : const Color(0xFF0F172A);
 
       return GestureDetector(
         onTap: () => selectedVal.value = label,
@@ -866,9 +866,9 @@ class ModuleSelectionScreen extends GetView<ModuleSelectionController> {
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
+                      color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.04),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
                     ),
                   ]
                 : [],
@@ -982,11 +982,11 @@ class ModuleSelectionScreen extends GetView<ModuleSelectionController> {
                                     : const Color(0xFFF1F5F9))
                                 : (isDark
                                     ? const Color(0xFF1C202C).withValues(alpha: 0.70)
-                                    : const Color(0xFFF8F9FA)),
+                                    : const Color(0xFFF8FAFC)),
                             borderRadius: BorderRadius.circular(10),
                             border: Border.all(
                               color: isSelected
-                                  ? (isDark ? const Color(0xFF384358) : Colors.black)
+                                  ? (isDark ? const Color(0xFF384358) : const Color(0xFF0F172A))
                                   : AppColors.getBorder(context).withValues(alpha: 0.60),
                             ),
                           ),
@@ -1005,8 +1005,8 @@ class ModuleSelectionScreen extends GetView<ModuleSelectionController> {
                               ),
                               if (isSelected)
                                 Icon(
-                                  Icons.check_circle_rounded,
-                                  color: isDark ? const Color(0xFFCBD5E1) : Colors.black,
+                                  Icons.check_rounded,
+                                  color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF0F172A),
                                   size: 18,
                                 ),
                             ],
@@ -1059,13 +1059,13 @@ class ModuleSelectionScreen extends GetView<ModuleSelectionController> {
                     child: ElevatedButton(
                       onPressed: _onStartPractice,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isDark ? const Color(0xFF222736) : Colors.black,
+                        backgroundColor: isDark ? const Color(0xFF222736) : const Color(0xFF242936),
                         foregroundColor: isDark ? const Color(0xFFE2E8F0) : Colors.white,
                         elevation: 0,
                         splashFactory: InkRipple.splashFactory,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: isDark ? const BorderSide(color: Color(0xFF333B50)) : BorderSide.none,
+                          side: isDark ? const BorderSide(color: Color(0xFF333B50)) : const BorderSide(color: Color(0xFF384054)),
                         ),
                       ),
                       child: Row(

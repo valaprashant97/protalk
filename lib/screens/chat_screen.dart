@@ -109,32 +109,9 @@ class ChatScreen extends GetView<ChatController> {
                               ),
                               if (_controller.appBarSubtitle.isNotEmpty) ...[
                                 const SizedBox(height: 2),
-                                SingleChildScrollView(
-                                  scrollDirection: Axis.horizontal,
-                                  physics: const BouncingScrollPhysics(),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2.5),
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? const Color(0xFF1C202C).withValues(alpha: 0.60)
-                                          : const Color(0xFFF1F5F9).withValues(alpha: 0.60),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
-                                        color: isDark
-                                            ? const Color(0xFF262B38).withValues(alpha: 0.60)
-                                            : const Color(0xFFE2E8F0).withValues(alpha: 0.60),
-                                        width: 1,
-                                      ),
-                                    ),
-                                    child: Text(
-                                      _controller.appBarSubtitle,
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF0F172A),
-                                      ),
-                                    ),
-                                  ),
+                                _LoopingMarqueeSubtitle(
+                                  text: _controller.appBarSubtitle,
+                                  isDark: isDark,
                                 ),
                               ],
                             ],
@@ -213,12 +190,13 @@ class ChatScreen extends GetView<ChatController> {
                         decoration: BoxDecoration(
                           color: isDark
                               ? const Color(0xFF222736).withValues(alpha: 0.60)
-                              : Colors.black.withValues(alpha: 0.85),
+                              : const Color(0xFFF1F5F9),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: isDark
                                 ? const Color(0xFF333B50).withValues(alpha: 0.60)
-                                : Colors.black.withValues(alpha: 0.85),
+                                : const Color(0xFFADB5BD),
+                            width: 1.2,
                           ),
                         ),
                         child: Row(
@@ -227,7 +205,7 @@ class ChatScreen extends GetView<ChatController> {
                             Icon(
                               Icons.add_rounded,
                               size: 20,
-                              color: isDark ? const Color(0xFFE2E8F0) : Colors.white,
+                              color: isDark ? const Color(0xFFE2E8F0) : AppColors.getTextPrimary(context),
                             ),
                             const SizedBox(width: 10),
                             Text(
@@ -235,7 +213,7 @@ class ChatScreen extends GetView<ChatController> {
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 fontSize: 15,
-                                color: isDark ? const Color(0xFFE2E8F0) : Colors.white,
+                                color: isDark ? const Color(0xFFE2E8F0) : AppColors.getTextPrimary(context),
                               ),
                             ),
                           ],
@@ -539,11 +517,11 @@ class ChatScreen extends GetView<ChatController> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: isDark ? const Color(0xFF222736) : Colors.black,
+                          backgroundColor: isDark ? const Color(0xFF222736) : const Color(0xFF242936),
                           foregroundColor: isDark ? const Color(0xFFE2E8F0) : Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
-                            side: isDark ? const BorderSide(color: Color(0xFF333B50)) : BorderSide.none,
+                            side: isDark ? const BorderSide(color: Color(0xFF333B50)) : const BorderSide(color: Color(0xFF384054)),
                           ),
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
@@ -599,11 +577,11 @@ class ChatScreen extends GetView<ChatController> {
     final maxBubbleWidth = screenWidth > 600 ? 540.0 : screenWidth * 0.84;
 
     // Softened comfortable low-glare bubbles
-    final userBubbleBg = isDark ? const Color(0xFF242938) : const Color(0xFF0F172A);
-    final userBubbleBorder = isDark ? const Color(0xFF333B4F) : const Color(0xFF0F172A);
+    final userBubbleBg = isDark ? const Color(0xFF242938) : const Color(0xFF1E293B);
+    final userBubbleBorder = isDark ? const Color(0xFF333B4F) : const Color(0xFF334155);
     final userBubbleFg = isDark ? const Color(0xFFE2E8F0) : Colors.white;
 
-    final aiBubbleBg = isDark ? const Color(0xFF151821) : const Color(0xFFF8F9FA);
+    final aiBubbleBg = isDark ? const Color(0xFF151821) : Colors.white;
     final aiBubbleBorder = isDark ? const Color(0xFF262B38) : const Color(0xFFE2E8F0);
     final aiBubbleFg = AppColors.getTextPrimary(context);
 
@@ -828,7 +806,7 @@ class ChatScreen extends GetView<ChatController> {
     final maxBubbleWidth = screenWidth > 600 ? 540.0 : screenWidth * 0.84;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final bubbleBg = isDark ? const Color(0xFF242938) : const Color(0xFF0F172A);
+    final bubbleBg = isDark ? const Color(0xFF242938) : const Color(0xFF1E293B);
     final bubbleFg = isDark ? const Color(0xFFE2E8F0) : Colors.white;
 
     return Padding(
@@ -850,7 +828,7 @@ class ChatScreen extends GetView<ChatController> {
                   bottomRight: Radius.circular(6),
                 ),
                 border: Border.all(
-                  color: isDark ? const Color(0xFF333B4F) : const Color(0xFF0F172A),
+                  color: isDark ? const Color(0xFF333B4F) : const Color(0xFF334155),
                   width: 1,
                 ),
                 boxShadow: [
@@ -941,7 +919,7 @@ class ChatScreen extends GetView<ChatController> {
                         border: Border.all(
                           color: isAvailable
                               ? (isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1))
-                              : (isDark ? const Color(0xFF4C2828) : const Color(0xFFFECACA)),
+                              : (isDark ? const Color(0xFF4C2828) : const Color(0xFFFCA5A5)),
                           width: 1.0,
                         ),
                       ),
@@ -1036,8 +1014,9 @@ class ChatScreen extends GetView<ChatController> {
                             style: OutlinedButton.styleFrom(
                               side: BorderSide(
                                 color: !isAvailable
-                                    ? (isDark ? const Color(0xFF4C2828) : const Color(0xFFFECACA))
-                                    : AppColors.getBorder(context).withValues(alpha: 0.7),
+                                    ? (isDark ? const Color(0xFF4C2828) : const Color(0xFFFCA5A5))
+                                    : AppColors.getBorder(context),
+                                width: 1.0,
                               ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(11),
@@ -1050,7 +1029,7 @@ class ChatScreen extends GetView<ChatController> {
                                 fontSize: 12,
                                 fontWeight: FontWeight.w600,
                                 color: !isAvailable
-                                    ? Colors.redAccent
+                                    ? (isDark ? Colors.redAccent : const Color(0xFFDC2626))
                                     : AppColors.getTextSecondary(context),
                               ),
                             ),
@@ -1072,14 +1051,14 @@ class ChatScreen extends GetView<ChatController> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: isDark
                                   ? const Color(0xFF222736)
-                                  : Colors.black.withValues(alpha: 0.88),
+                                  : const Color(0xFF242936),
                               foregroundColor: isDark ? const Color(0xFFE2E8F0) : Colors.white,
                               elevation: 0,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(11),
                                 side: isDark
                                     ? const BorderSide(color: Color(0xFF333B50))
-                                    : BorderSide.none,
+                                    : const BorderSide(color: Color(0xFF384054)),
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 10),
                             ),
@@ -1479,4 +1458,160 @@ class _RoundedSquareProgressPainter extends CustomPainter {
       oldDelegate.color != color ||
       oldDelegate.backgroundColor != backgroundColor;
 }
+
+// region Looping Marquee Subtitle
+class _LoopingMarqueeSubtitle extends StatefulWidget {
+  final String text;
+  final bool isDark;
+
+  const _LoopingMarqueeSubtitle({
+    required this.text,
+    required this.isDark,
+  });
+
+  @override
+  State<_LoopingMarqueeSubtitle> createState() => _LoopingMarqueeSubtitleState();
+}
+
+class _LoopingMarqueeSubtitleState extends State<_LoopingMarqueeSubtitle>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 30),
+    )..repeat();
+  }
+
+  @override
+  void didUpdateWidget(covariant _LoopingMarqueeSubtitle oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.text != widget.text) {
+      _controller.reset();
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = widget.isDark;
+    final textStyle = TextStyle(
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+      color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF0F172A),
+    );
+
+    final textPainter = TextPainter(
+      text: TextSpan(text: widget.text, style: textStyle),
+      textDirection: TextDirection.ltr,
+      maxLines: 1,
+    )..layout();
+
+    final textWidth = textPainter.width;
+    const gap = 36.0;
+    final totalSpan = textWidth + gap;
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    final maxPillWidth = (screenWidth * 0.72).clamp(220.0, 320.0);
+    final contentWidth = textWidth > (maxPillWidth - 20) ? (maxPillWidth - 20) : textWidth;
+
+    return Container(
+      constraints: BoxConstraints(maxWidth: maxPillWidth),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2.5),
+      decoration: BoxDecoration(
+        color: isDark
+            ? const Color(0xFF1C202C).withValues(alpha: 0.60)
+            : const Color(0xFFF1F5F9).withValues(alpha: 0.60),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isDark
+              ? const Color(0xFF262B38).withValues(alpha: 0.60)
+              : const Color(0xFFE2E8F0).withValues(alpha: 0.60),
+          width: 1,
+        ),
+      ),
+      child: ClipRect(
+        child: ShaderMask(
+          shaderCallback: (Rect bounds) {
+            return const LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: [
+                Colors.transparent,
+                Colors.black,
+                Colors.black,
+                Colors.transparent,
+              ],
+              stops: [0.0, 0.09, 0.91, 1.0],
+            ).createShader(bounds);
+          },
+          blendMode: BlendMode.dstIn,
+          child: SizedBox(
+            width: contentWidth,
+            height: textPainter.height,
+            child: AnimatedBuilder(
+              animation: _controller,
+              builder: (context, _) {
+                // Smooth Right-to-Left circular looping offset
+                final currentOffset = _controller.value * totalSpan;
+
+                return Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Positioned(
+                      left: -currentOffset - totalSpan,
+                      top: 0,
+                      child: Text(
+                        widget.text,
+                        style: textStyle,
+                        maxLines: 1,
+                      ),
+                    ),
+                    Positioned(
+                      left: -currentOffset,
+                      top: 0,
+                      child: Text(
+                        widget.text,
+                        style: textStyle,
+                        maxLines: 1,
+                      ),
+                    ),
+                    Positioned(
+                      left: -currentOffset + totalSpan,
+                      top: 0,
+                      child: Text(
+                        widget.text,
+                        style: textStyle,
+                        maxLines: 1,
+                      ),
+                    ),
+                    Positioned(
+                      left: -currentOffset + (2 * totalSpan),
+                      top: 0,
+                      child: Text(
+                        widget.text,
+                        style: textStyle,
+                        maxLines: 1,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 // endregion
+
