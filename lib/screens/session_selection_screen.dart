@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../controllers/session_selection_controller.dart';
 import '../routes/app_routes.dart';
 import '../services/database/tables/chat_history_table.dart';
@@ -262,7 +263,11 @@ class SessionSelectionScreen extends GetView<SessionSelectionController> {
     SessionSelectionController controller,
     SessionSummaryModel session,
   ) {
-    final isInterview = session.module.toLowerCase() == 'interview';
+    final isEnglish = session.module.toLowerCase() == 'english' ||
+        session.title.toLowerCase().contains('english');
+    final svgAsset = isEnglish
+        ? 'assets/svg/english-communication.svg'
+        : 'assets/svg/interview.svg';
 
     return Material(
       color: Colors.transparent,
@@ -288,7 +293,7 @@ class SessionSelectionScreen extends GetView<SessionSelectionController> {
           ),
           child: Row(
             children: [
-              // Icon container: shopping_cart for interview, language for english
+              // Icon container: interview or english-communication SVG
               Container(
                 width: 40,
                 height: 40,
@@ -300,10 +305,17 @@ class SessionSelectionScreen extends GetView<SessionSelectionController> {
                     width: 1,
                   ),
                 ),
-                child: Icon(
-                  isInterview ? Icons.work_outline_rounded : Icons.translate_rounded,
-                  size: 20,
-                  color: AppColors.getTextPrimary(context),
+                child: Center(
+                  child: SvgPicture.asset(
+                    svgAsset,
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.contain,
+                    colorFilter: ColorFilter.mode(
+                      AppColors.getTextPrimary(context),
+                      BlendMode.srcIn,
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 14),

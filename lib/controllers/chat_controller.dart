@@ -44,6 +44,14 @@ class ChatController extends GetxController {
 
   var recentSessions = <RecentHistory>[].obs;
 
+  /// Currently active speaking message (if any)
+  final Rxn<ChatMessage> speakingMessage = Rxn<ChatMessage>();
+
+  /// Checks if a given chat message is currently being spoken
+  bool isMessageSpeaking(ChatMessage message) {
+    return speakingMessage.value == message && TextToSpeechService.instance.isSpeaking.value;
+  }
+
   /// Main title for AppBar ("Interview" or "English Conversation")
   String get appBarTitle {
     if (sessionConfig.containsKey('module')) {
@@ -114,6 +122,13 @@ class ChatController extends GetxController {
     super.onInit();
     _loadRecentSessionsFromDb();
 
+    // Reset speaking message whenever TTS stops speaking
+    ever(TextToSpeechService.instance.isSpeaking, (bool speaking) {
+      if (!speaking) {
+        speakingMessage.value = null;
+      }
+    });
+
     // Load arguments from ModuleSelectionScreen or SessionSelectionScreen
     if (Get.arguments != null && Get.arguments is Map<String, dynamic>) {
       sessionConfig.value = Get.arguments as Map<String, dynamic>;
@@ -158,7 +173,7 @@ class ChatController extends GetxController {
     try {
       final dbSessions = await DatabaseHelper.instance.getAllChatSessions();
       recentSessions.value = dbSessions
-          .map((s) => RecentHistory(id: s.sessionId, title: s.title))
+          .map((s) => RecentHistory(id: s.sessionId, title: s.title, module: s.module))
           .toList();
     } catch (_) {
       recentSessions.clear();
@@ -201,6 +216,7 @@ class ChatController extends GetxController {
 
   /// Callback invoked when TTS completes speaking an AI response
   void _onTtsComplete() {
+    speakingMessage.value = null;
     if (isAutoMode.value && !isAutoPaused.value) {
       // In Live Auto Mode, immediately start listening for the user's next turn
       startListening();
@@ -228,16 +244,18 @@ class ChatController extends GetxController {
 
       if (index != -1 && index < messages.length) {
         final time = messages[index].timestamp;
-        messages[index] = ChatMessage(
+        final updatedAiMsg = ChatMessage(
           text: responseText,
           isUser: false,
           isGenerating: false,
           timestamp: time,
         );
+        messages[index] = updatedAiMsg;
         messages.refresh();
         if (responseText.trim().isNotEmpty) {
           _saveMessageToDb(responseText, false);
           currentState.value = VoiceState.aiSpeaking;
+          speakingMessage.value = updatedAiMsg;
           await TextToSpeechService.instance.speak(
             responseText,
             onComplete: _onTtsComplete,
@@ -463,16 +481,18 @@ class ChatController extends GetxController {
       // Complete response received: remove loading indicator and reveal full AI message
       if (index != -1 && index < messages.length) {
         final time = messages[index].timestamp;
-        messages[index] = ChatMessage(
+        final updatedAiMsg = ChatMessage(
           text: responseText,
           isUser: false,
           isGenerating: false,
           timestamp: time,
         );
+        messages[index] = updatedAiMsg;
         messages.refresh();
         if (responseText.trim().isNotEmpty) {
           _saveMessageToDb(responseText, false);
           currentState.value = VoiceState.aiSpeaking;
+          speakingMessage.value = updatedAiMsg;
           await TextToSpeechService.instance.speak(
             responseText,
             onComplete: _onTtsComplete,
@@ -498,8 +518,34 @@ class ChatController extends GetxController {
     }
   }
 
-  /// Replays an AI message text using centralized TTS service
-  Future<void> replayAiMessage(String text) async {
+  /// Speaks an AI message using centralized TTS service, or toggles playback off if already speaking
+  Future<void> replayAiMessage(ChatMessage message) async {
+    if (message.text.trim().isEmpty) return;
+
+    if (speakingMessage.value == message && TextToSpeechService.instance.isSpeaking.value) {
+      await TextToSpeechService.instance.stop();
+      speakingMessage.value = null;
+      if (currentState.value == VoiceState.aiSpeaking) {
+        currentState.value = VoiceState.idle;
+      }
+      return;
+    }
+
+    speakingMessage.value = message;
+    currentState.value = VoiceState.aiSpeaking;
+    await TextToSpeechService.instance.speak(
+      message.text,
+      onComplete: () {
+        if (speakingMessage.value == message) {
+          speakingMessage.value = null;
+        }
+        _onTtsComplete();
+      },
+    );
+  }
+
+  /// Replays raw text using centralized TTS service (legacy compatibility)
+  Future<void> replayAiMessageText(String text) async {
     if (text.trim().isEmpty) return;
     await TextToSpeechService.instance.speak(text);
   }
@@ -511,6 +557,7 @@ class ChatController extends GetxController {
 
     // Stop active TTS audio speaking if any
     await TextToSpeechService.instance.stop();
+    speakingMessage.value = null;
 
     // Cancel current active recording if listening
     if (currentState.value == VoiceState.listening) {
@@ -547,12 +594,14 @@ class ChatController extends GetxController {
 
   /// Send AI message (standard fallback)
   void sendAiMessage(String value) {
-    messages.add(ChatMessage(text: value, isUser: false));
+    final aiMsg = ChatMessage(text: value, isUser: false);
+    messages.add(aiMsg);
     _saveMessageToDb(value, false);
     liveSpeech.value = "";
     scrollToBottom();
     if (value.trim().isNotEmpty) {
       currentState.value = VoiceState.aiSpeaking;
+      speakingMessage.value = aiMsg;
       TextToSpeechService.instance.speak(value, onComplete: _onTtsComplete);
     } else {
       _onTtsComplete();
@@ -813,6 +862,8 @@ class ChatController extends GetxController {
 
   @override
   void onClose() {
+    TextToSpeechService.instance.stop();
+    speakingMessage.value = null;
     _audioRecorder.dispose();
     scrollController.dispose();
     super.onClose();

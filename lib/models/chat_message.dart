@@ -34,16 +34,23 @@ class ChatMessage {
 class RecentHistory {
   final String id;
   final String title;
+  final String module;
 
-  RecentHistory({required this.id, required this.title});
+  RecentHistory({
+    required this.id,
+    required this.title,
+    this.module = 'interview',
+  });
 
   RecentHistory copyWith({
     String? id,
     String? title,
+    String? module,
   }) {
     return RecentHistory(
       id: id ?? this.id,
       title: title ?? this.title,
+      module: module ?? this.module,
     );
   }
 }

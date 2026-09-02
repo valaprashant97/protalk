@@ -95,6 +95,7 @@ class ChatScreen extends GetView<ChatController> {
                         child: Obx(
                           () => Column(
                             mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
                                 _controller.appBarTitle,
@@ -189,15 +190,24 @@ class ChatScreen extends GetView<ChatController> {
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         decoration: BoxDecoration(
                           color: isDark
-                              ? const Color(0xFF222736).withValues(alpha: 0.60)
-                              : const Color(0xFFF1F5F9),
+                              ? Colors.transparent
+                              : Colors.white.withValues(alpha: 0.65),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isDark
-                                ? const Color(0xFF333B50).withValues(alpha: 0.60)
-                                : const Color(0xFFADB5BD),
-                            width: 1.2,
-                          ),
+                          border: isDark
+                              ? Border.all(
+                                  color: const Color(0xFF333B50).withValues(alpha: 0.60),
+                                  width: 1.2,
+                                )
+                              : null,
+                          boxShadow: isDark
+                              ? null
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.04),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -252,6 +262,11 @@ class ChatScreen extends GetView<ChatController> {
                                 itemBuilder: (context, index) {
                                   final session = _controller.recentSessions[index];
                                   final isSelected = session.id == _controller.selectedSessionId.value;
+                                  final isEnglish = session.module.toLowerCase() == 'english' ||
+                                      session.title.toLowerCase().contains('english');
+                                  final svgAsset = isEnglish
+                                      ? 'assets/svg/english-communication.svg'
+                                      : 'assets/svg/interview.svg';
                                   return Padding(
                                     padding: const EdgeInsets.only(bottom: 4.0),
                                     child: Material(
@@ -263,24 +278,47 @@ class ChatScreen extends GetView<ChatController> {
                                         },
                                         borderRadius: BorderRadius.circular(10),
                                         child: Container(
-                                          padding: const EdgeInsets.only(left: 12, right: 4, top: 4, bottom: 4),
+                                          padding: const EdgeInsets.only(left: 12, right: 4, top: 6, bottom: 6),
                                           decoration: BoxDecoration(
                                             color: isSelected
                                                 ? (isDark
-                                                    ? const Color(0xFF1E2330).withValues(alpha: 0.60)
-                                                    : const Color(0xFFF1F5F9).withValues(alpha: 0.60))
+                                                    ? Colors.transparent
+                                                    : Colors.white.withValues(alpha: 0.60))
                                                 : Colors.transparent,
                                             borderRadius: BorderRadius.circular(10),
-                                            border: Border.all(
-                                              color: isSelected
-                                                  ? (isDark
-                                                      ? const Color(0xFF2E3547).withValues(alpha: 0.60)
-                                                      : const Color(0xFFE2E8F0).withValues(alpha: 0.60))
-                                                  : Colors.transparent,
-                                            ),
+                                            border: (isSelected && isDark)
+                                                ? Border.all(
+                                                    color: const Color(0xFF2E3547).withValues(alpha: 0.60),
+                                                  )
+                                                : null,
+                                            boxShadow: (isSelected && !isDark)
+                                                ? [
+                                                    BoxShadow(
+                                                      color: Colors.black.withValues(alpha: 0.03),
+                                                      blurRadius: 6,
+                                                      offset: const Offset(0, 1),
+                                                    ),
+                                                  ]
+                                                : null,
                                           ),
                                           child: Row(
                                             children: [
+                                              Opacity(
+                                                opacity: isSelected ? 1.0 : 0.75,
+                                                child: SvgPicture.asset(
+                                                  svgAsset,
+                                                  width: 20,
+                                                  height: 20,
+                                                  fit: BoxFit.contain,
+                                                  colorFilter: ColorFilter.mode(
+                                                    isSelected
+                                                        ? (isDark ? const Color(0xFFE2E8F0) : AppColors.getTextPrimary(context))
+                                                        : (isDark ? const Color(0xFF94A3B8) : AppColors.getTextSecondary(context)),
+                                                    BlendMode.srcIn,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 10),
                                               Expanded(
                                                 child: Text(
                                                   session.title,
@@ -665,19 +703,40 @@ class ChatScreen extends GetView<ChatController> {
                                   if (isUser) {
                                     _controller.deleteMessageAndSubsequent(message);
                                   } else {
-                                    _controller.replayAiMessage(message.text);
+                                    _controller.replayAiMessage(message);
                                   }
                                 },
                                 borderRadius: BorderRadius.circular(12),
                                 child: Padding(
                                   padding: const EdgeInsets.all(3.0),
-                                  child: Icon(
-                                    isUser ? Icons.refresh_rounded : Icons.volume_up_rounded,
-                                    size: 16,
-                                    color: isUser
-                                        ? userBubbleFg.withValues(alpha: 0.8)
-                                        : AppColors.getTextSecondary(context),
-                                  ),
+                                  child: isUser
+                                      ? SvgPicture.asset(
+                                          'assets/svg/refresh.svg',
+                                          width: 16,
+                                          height: 16,
+                                          fit: BoxFit.contain,
+                                          colorFilter: ColorFilter.mode(
+                                            userBubbleFg.withValues(alpha: 0.8),
+                                            BlendMode.srcIn,
+                                          ),
+                                        )
+                                      : Obx(
+                                          () {
+                                            final isSpeaking = _controller.isMessageSpeaking(message);
+                                            return SvgPicture.asset(
+                                              isSpeaking
+                                                  ? 'assets/svg/volume-up.svg'
+                                                  : 'assets/svg/volume-mute.svg',
+                                              width: 16,
+                                              height: 16,
+                                              fit: BoxFit.contain,
+                                              colorFilter: ColorFilter.mode(
+                                                AppColors.getTextSecondary(context),
+                                                BlendMode.srcIn,
+                                              ),
+                                            );
+                                          },
+                                        ),
                                 ),
                               ),
                             ),
@@ -1388,10 +1447,11 @@ class _HoldToSwitchMicButtonState extends State<_HoldToSwitchMicButton>
                 ),
                 child: Center(
                   child: SvgPicture.asset(
-                    'assets/svg/mic.svg',
+                    isListening ? 'assets/svg/stop.svg' : 'assets/svg/mic.svg',
                     colorFilter: const ColorFilter.mode(iconColor, BlendMode.srcIn),
                     width: 32,
                     height: 32,
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),
@@ -1507,6 +1567,7 @@ class _LoopingMarqueeSubtitleState extends State<_LoopingMarqueeSubtitle>
     final textStyle = TextStyle(
       fontSize: 11,
       fontWeight: FontWeight.w600,
+      height: 1.2,
       color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF0F172A),
     );
 
@@ -1526,7 +1587,7 @@ class _LoopingMarqueeSubtitleState extends State<_LoopingMarqueeSubtitle>
 
     return Container(
       constraints: BoxConstraints(maxWidth: maxPillWidth),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2.5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3.5),
       decoration: BoxDecoration(
         color: isDark
             ? const Color(0xFF1C202C).withValues(alpha: 0.60)
@@ -1539,73 +1600,90 @@ class _LoopingMarqueeSubtitleState extends State<_LoopingMarqueeSubtitle>
           width: 1,
         ),
       ),
-      child: ClipRect(
-        child: ShaderMask(
-          shaderCallback: (Rect bounds) {
-            return const LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: [
-                Colors.transparent,
-                Colors.black,
-                Colors.black,
-                Colors.transparent,
-              ],
-              stops: [0.0, 0.09, 0.91, 1.0],
-            ).createShader(bounds);
-          },
-          blendMode: BlendMode.dstIn,
-          child: SizedBox(
-            width: contentWidth,
-            height: textPainter.height,
-            child: AnimatedBuilder(
-              animation: _controller,
-              builder: (context, _) {
-                // Smooth Right-to-Left circular looping offset
-                final currentOffset = _controller.value * totalSpan;
+      child: Center(
+        widthFactor: 1.0,
+        heightFactor: 1.0,
+        child: ClipRect(
+          child: ShaderMask(
+            shaderCallback: (Rect bounds) {
+              return const LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: [
+                  Colors.transparent,
+                  Colors.black,
+                  Colors.black,
+                  Colors.transparent,
+                ],
+                stops: [0.0, 0.09, 0.91, 1.0],
+              ).createShader(bounds);
+            },
+            blendMode: BlendMode.dstIn,
+            child: SizedBox(
+              width: contentWidth,
+              height: textPainter.height,
+              child: AnimatedBuilder(
+                animation: _controller,
+                builder: (context, _) {
+                  // Smooth Right-to-Left circular looping offset
+                  final currentOffset = _controller.value * totalSpan;
 
-                return Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Positioned(
-                      left: -currentOffset - totalSpan,
-                      top: 0,
-                      child: Text(
-                        widget.text,
-                        style: textStyle,
-                        maxLines: 1,
+                  return Stack(
+                    alignment: Alignment.centerLeft,
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned(
+                        left: -currentOffset - totalSpan,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: Text(
+                            widget.text,
+                            style: textStyle,
+                            maxLines: 1,
+                          ),
+                        ),
                       ),
-                    ),
-                    Positioned(
-                      left: -currentOffset,
-                      top: 0,
-                      child: Text(
-                        widget.text,
-                        style: textStyle,
-                        maxLines: 1,
+                      Positioned(
+                        left: -currentOffset,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: Text(
+                            widget.text,
+                            style: textStyle,
+                            maxLines: 1,
+                          ),
+                        ),
                       ),
-                    ),
-                    Positioned(
-                      left: -currentOffset + totalSpan,
-                      top: 0,
-                      child: Text(
-                        widget.text,
-                        style: textStyle,
-                        maxLines: 1,
+                      Positioned(
+                        left: -currentOffset + totalSpan,
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: Text(
+                            widget.text,
+                            style: textStyle,
+                            maxLines: 1,
+                          ),
+                        ),
                       ),
-                    ),
-                    Positioned(
-                      left: -currentOffset + (2 * totalSpan),
-                      top: 0,
-                      child: Text(
-                        widget.text,
-                        style: textStyle,
-                        maxLines: 1,
+                      Positioned(
+                        left: -currentOffset + (2 * totalSpan),
+                        top: 0,
+                        bottom: 0,
+                        child: Center(
+                          child: Text(
+                            widget.text,
+                            style: textStyle,
+                            maxLines: 1,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),

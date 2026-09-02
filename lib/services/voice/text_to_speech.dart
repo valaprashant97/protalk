@@ -149,6 +149,7 @@ class TextToSpeechService {
     }
     try {
       await stop(triggerCallback: false);
+      isSpeaking.value = true;
       _onSpeechCompleted = onComplete;
 
       await _flutterTts.setVolume(volume.value);

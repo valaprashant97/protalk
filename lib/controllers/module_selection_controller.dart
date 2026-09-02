@@ -38,7 +38,7 @@ class ModuleSelectionController extends GetxController {
     'Dart',
     'Kotlin',
     'Swift',
-
+    'Git & GitHub',
     'MERN Stack',
     'MEAN Stack',
     'MEVN Stack',
@@ -48,38 +48,32 @@ class ModuleSelectionController extends GetxController {
     'Django',
     'Laravel',
     'Ruby on Rails',
-
     'Flutter',
     'React',
     'Angular',
     'Vue.js',
     'Node.js',
     'Express.js',
-
     'AI & Machine Learning',
     'Deep Learning',
     'Data Science',
     'Generative AI',
     'Natural Language Processing',
     'Computer Vision',
-
     'SQL',
     'MySQL',
     'PostgreSQL',
     'MongoDB',
     'Firebase',
-
     'DevOps',
     'Docker',
     'Kubernetes',
     'AWS',
     'Microsoft Azure',
     'Google Cloud',
-
     'Cybersecurity',
     'Blockchain',
     'IoT',
-    'Git & GitHub',
   ];
 
   // Selected Skills List
