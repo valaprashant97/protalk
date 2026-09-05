@@ -75,7 +75,7 @@ class TextToSpeechService with WidgetsBindingObserver {
 
       // Load saved settings from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
-      volume.value = prefs.getDouble(_keyVolume) ?? 1.0;
+      volume.value = (prefs.getDouble(_keyVolume) ?? 1.0).clamp(0.0, 1.5);
       speechSpeed.value = prefs.getDouble(_keySpeed) ?? 0.45;
       voiceGender.value = prefs.getString(_keyGender) ?? 'female';
 
@@ -105,7 +105,7 @@ class TextToSpeechService with WidgetsBindingObserver {
       }
 
       // Apply rate, volume, and natural pitch 1.0
-      await _flutterTts.setVolume(volume.value);
+      await _flutterTts.setVolume(volume.value.clamp(0.0, 1.0));
       await _flutterTts.setSpeechRate(speechSpeed.value);
       await _flutterTts.setPitch(1.0);
 
@@ -156,7 +156,7 @@ class TextToSpeechService with WidgetsBindingObserver {
       isSpeaking.value = true;
       _onSpeechCompleted = onComplete;
 
-      await _flutterTts.setVolume(volume.value);
+      await _flutterTts.setVolume(volume.value.clamp(0.0, 1.0));
       await _flutterTts.setSpeechRate(speechSpeed.value);
 
       if (activeVoice.isNotEmpty) {
@@ -231,12 +231,12 @@ class TextToSpeechService with WidgetsBindingObserver {
     }
   }
 
-  /// Updates speech volume (0.0 to 1.0) and persists choice
+  /// Updates speech volume (0.0 to 1.5, with 1.0 being standard 100% default) and persists choice
   Future<void> setVolume(double vol) async {
-    final clamped = vol.clamp(0.0, 1.0);
+    final clamped = vol.clamp(0.0, 1.5);
     volume.value = clamped;
     try {
-      await _flutterTts.setVolume(clamped);
+      await _flutterTts.setVolume(clamped.clamp(0.0, 1.0));
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble(_keyVolume, clamped);
     } catch (e) {

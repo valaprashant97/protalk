@@ -260,10 +260,10 @@ class SettingsScreen extends GetView<SettingsController> {
                         const SizedBox(height: 10),
                         Obx(
                           () => Slider(
-                            value: controller.volume.value,
+                            value: controller.volume.value.clamp(0.0, 1.5),
                             min: 0.0,
-                            max: 1.0,
-                            divisions: 20,
+                            max: 1.5,
+                            divisions: 30,
                             onChanged: (val) => controller.setVolume(val),
                           ),
                         ),
