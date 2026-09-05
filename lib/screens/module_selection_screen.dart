@@ -512,7 +512,7 @@ class ModuleSelectionScreen extends GetView<ModuleSelectionController> {
                 label: 'LANGUAGE',
                 hint: 'Select Language',
                 value: _controller.selectedLanguage.value,
-                icon: Icons.language_rounded,
+                icon: Icons.language_outlined,
                 isError: isError,
                 errorMessage: 'Please select language',
                 onTap: () => _showSelectionBottomSheet(

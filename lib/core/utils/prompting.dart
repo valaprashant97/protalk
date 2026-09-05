@@ -836,7 +836,22 @@ Every response must feel like a natural human conversation, not a generated ques
       "1. Evaluate the USER's actual speech, answers, grammar, vocabulary, structure, and topic relevance based strictly on the transcript above without inventing data.",
     );
     promptBuffer.writeln(
-      "2. Output ONLY a valid raw JSON object conforming to the schema below. Do not output markdown backticks (```json), preambles, or postscripts.\n",
+      "2. DYNAMIC ITEM COUNTS: Do NOT force exactly 2 items for 'strengths', 'areasToImprove', or 'improvementTips'. The number of items in these sections MUST vary dynamically based strictly on the user's actual conversation evidence (including 0 items when there is no meaningful issue or strength).",
+    );
+    promptBuffer.writeln(
+      "3. ZERO ITEMS ALLOWED: If the user performed without any noticeable flaws, return an empty array [] for 'areasToImprove' and 'improvementTips'. If the user showed no notable strengths, return []. Never invent generic or unevidenced praise or critique.",
+    );
+    promptBuffer.writeln(
+      "4. SPECIFIC & RELEVANT: Every single strength, area to improve, and tip must be relevant, specific, and supported by the user's actual transcript turns. Avoid generic or repeated feedback.",
+    );
+    promptBuffer.writeln(
+      "5. PAIRED ACTIONABLE TIPS: Each item in 'improvementTips' must provide a practical, concrete action directly addressing an identified 'areasToImprove'. If 'areasToImprove' is empty, 'improvementTips' MUST also be empty [].",
+    );
+    promptBuffer.writeln(
+      "6. MATHEMATICAL SCORE CONSISTENCY: The 'overallScore' MUST strictly equal the average of the 10 metric scores divided by 10.0, rounded to 1 decimal place (e.g., if metric scores average 75.0, overallScore MUST be 7.5). It must NEVER be 10.0 if metric scores are in the 70s or 80s.",
+    );
+    promptBuffer.writeln(
+      "7. Output ONLY a valid raw JSON object conforming to the schema below. Do not output markdown backticks (```json), preambles, or postscripts.\n",
     );
 
     // 4. Output JSON Schema by Module
@@ -846,7 +861,7 @@ Required 10 Metrics: Confidence, Communication Skills, Answer Quality, Technical
 
 JSON Output Schema Specification:
 {
-  "overallScore": number_between_0.0_and_10.0,
+  "overallScore": number_between_0.0_and_10.0_matching_average_of_metrics_divided_by_10,
   "metrics": [
     {"name": "Confidence", "score": number_between_0_and_100},
     {"name": "Communication Skills", "score": number_between_0_and_100},
@@ -860,19 +875,20 @@ JSON Output Schema Specification:
     {"name": "Response Relevance", "score": number_between_0_and_100}
   ],
   "strengths": [
-    "string_evaluating_actual_candidate_performance_1",
-    "string_evaluating_actual_candidate_performance_2"
+    /* 0 or more specific strings evaluating actual candidate strengths demonstrated in the conversation. Can be empty [] */
   ],
   "areasToImprove": [
+    /* 0 or more objects for genuine areas needing improvement. Can be empty [] if user performed well */
     {
-      "category": "string_category_name",
-      "description": "string_describing_specific_area_needing_improvement"
+      "category": "specific_category_name",
+      "description": "specific_observation_supported_by_transcript"
     }
   ],
   "improvementTips": [
+    /* 0 or more actionable advice objects targeting the identified areas. Can be empty [] if no areas to improve */
     {
-      "category": "string_category_name",
-      "tip": "string_actionable_advice_for_candidate"
+      "category": "specific_category_name",
+      "tip": "concrete_actionable_tip_for_candidate"
     }
   ]
 }
@@ -883,7 +899,7 @@ Required 10 Metrics: English Fluency, Grammar, Vocabulary, Pronunciation, Confid
 
 JSON Output Schema Specification:
 {
-  "overallScore": number_between_0.0_and_10.0,
+  "overallScore": number_between_0.0_and_10.0_matching_average_of_metrics_divided_by_10,
   "metrics": [
     {"name": "English Fluency", "score": number_between_0_and_100},
     {"name": "Grammar", "score": number_between_0_and_100},
@@ -897,19 +913,20 @@ JSON Output Schema Specification:
     {"name": "Filler Word Control", "score": number_between_0_and_100}
   ],
   "strengths": [
-    "string_evaluating_user_speaking_fluency_1",
-    "string_evaluating_user_speaking_fluency_2"
+    /* 0 or more specific strings evaluating actual user speaking strengths demonstrated in the conversation. Can be empty [] */
   ],
   "areasToImprove": [
+    /* 0 or more objects for genuine areas needing improvement. Can be empty [] if user spoke accurately */
     {
-      "category": "string_category_name",
-      "description": "string_describing_user_grammar_or_vocab_area_to_improve"
+      "category": "specific_category_name",
+      "description": "specific_observation_supported_by_transcript"
     }
   ],
   "improvementTips": [
+    /* 0 or more actionable tip objects targeting the identified areas. Can be empty [] if no areas to improve */
     {
-      "category": "string_category_name",
-      "tip": "string_actionable_tip_for_user"
+      "category": "specific_category_name",
+      "tip": "concrete_actionable_tip_for_user"
     }
   ]
 }

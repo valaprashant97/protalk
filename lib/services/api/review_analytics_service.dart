@@ -114,13 +114,13 @@ class ReviewAnalyticsService {
     final isInterview = module == 'interview';
 
     // Parse overall score
-    final double overallScore = (jsonMap['overallScore'] as num? ?? 8.0).toDouble().clamp(0.0, 10.0);
+    final double rawOverall = (jsonMap['overallScore'] as num? ?? 8.0).toDouble().clamp(0.0, 10.0);
 
     // Reject prompt sample echoes
     final List<String> rawStrengths = (jsonMap['strengths'] is List)
         ? (jsonMap['strengths'] as List).map((s) => s.toString()).toList()
         : [];
-    final isPromptEcho = (overallScore == 8.2 || overallScore == 8.5) &&
+    final isPromptEcho = (rawOverall == 8.2 || rawOverall == 8.5) &&
         rawStrengths.any((s) => s.contains("Clear articulation") || s.contains("Engaging conversational flow"));
     if (isPromptEcho) {
       throw Exception("AI returned prompt sample echo instead of genuine user evaluation.");
@@ -138,7 +138,7 @@ class ReviewAnalyticsService {
       }
     }
 
-    // Ensure 10 fallback metrics if AI output fewer
+    // Ensure 10 metrics if AI output fewer
     if (metrics.length < 10) {
       final defaultMetricNames = isInterview
           ? [
@@ -169,12 +169,23 @@ class ReviewAnalyticsService {
       final existingNames = metrics.map((m) => m.name.toLowerCase()).toSet();
       for (final defaultName in defaultMetricNames) {
         if (!existingNames.contains(defaultName.toLowerCase())) {
-          metrics.add(ReportMetric(name: defaultName, score: (overallScore * 10).round()));
+          metrics.add(ReportMetric(name: defaultName, score: (rawOverall * 10).round()));
         }
       }
     }
 
-    // Parse strengths
+    // Mathematically reconcile overallScore with the metrics average
+    double overallScore = rawOverall;
+    if (metrics.isNotEmpty) {
+      final double metricsAvg = metrics.fold<num>(0, (sum, m) => sum + m.score) / metrics.length;
+      final double calculatedScore = (metricsAvg / 10.0 * 10).roundToDouble() / 10.0;
+      // If AI overallScore deviates significantly from metric average, align it with the true average
+      if ((rawOverall - calculatedScore).abs() > 0.4 || (rawOverall >= 9.5 && calculatedScore < 9.0)) {
+        overallScore = calculatedScore;
+      }
+    }
+
+    // Parse strengths dynamically without forcing dummy fallback items
     List<String> strengths = [];
     if (jsonMap['strengths'] is List) {
       strengths = (jsonMap['strengths'] as List)
@@ -182,14 +193,8 @@ class ReviewAnalyticsService {
           .where((s) => s.isNotEmpty)
           .toList();
     }
-    if (strengths.isEmpty) {
-      strengths = [
-        "Completed a detailed practice session with active participation.",
-        "Demonstrated clear engagement and intent across conversation turns.",
-      ];
-    }
 
-    // Parse areas to improve
+    // Parse areas to improve dynamically without forcing dummy fallback items
     List<FeedbackItem> areasToImprove = [];
     if (jsonMap['areasToImprove'] is List) {
       for (final item in jsonMap['areasToImprove']) {
@@ -202,14 +207,8 @@ class ReviewAnalyticsService {
         }
       }
     }
-    if (areasToImprove.isEmpty) {
-      areasToImprove.add(FeedbackItem(
-        category: "Depth & Detail",
-        description: "Elaborate further with structured examples in future sessions.",
-      ));
-    }
 
-    // Parse improvement tips
+    // Parse improvement tips dynamically without forcing dummy fallback items
     List<ImprovementTipItem> improvementTips = [];
     if (jsonMap['improvementTips'] is List) {
       for (final item in jsonMap['improvementTips']) {
@@ -221,12 +220,6 @@ class ReviewAnalyticsService {
           }
         }
       }
-    }
-    if (improvementTips.isEmpty) {
-      improvementTips.add(ImprovementTipItem(
-        category: "Practice Strategy",
-        tip: "Maintain a steady speaking rhythm and organize thoughts prior to responding.",
-      ));
     }
 
     return SessionReport(
@@ -268,10 +261,20 @@ class ReviewAnalyticsService {
     final uniqueWords = allWords.toSet().length;
     final vocabRichness = allWords.isNotEmpty ? (uniqueWords / allWords.length) : 0.5;
 
-    // Detect filler words ("um", "uh", "like", "you know", "basically", "actually")
+    // Detect filler words ("um", "uh", "like", "you know", "basically", "actually", "hmm", "hm")
     final fillerWords = {'um', 'uh', 'like', 'you know', 'basically', 'actually', 'hmm', 'hm'};
-    final fillerCount = allWords.where((w) => fillerWords.contains(w)).length;
+    final detectedFillers = allWords.where((w) => fillerWords.contains(w)).toList();
+    final fillerCount = detectedFillers.length;
     final fillerRatio = allWords.isNotEmpty ? (fillerCount / allWords.length) : 0.0;
+
+    // Check sentence structure signals (terminal punctuation and questions)
+    int punctuatedTurns = 0;
+    int questionsAsked = 0;
+    for (final t in userTexts) {
+      if (t.endsWith('.') || t.endsWith('!') || t.endsWith('?')) punctuatedTurns++;
+      if (t.contains('?')) questionsAsked++;
+    }
+    final punctuationRatio = punctuatedTurns / userCount;
 
     // Long vs short responses
     final longResponses = userTexts.where((t) => t.split(RegExp(r'\s+')).length >= 10).length;
@@ -282,7 +285,7 @@ class ReviewAnalyticsService {
     int scoreVocab = ((vocabRichness * 75) + 42).clamp(65.0, 95.0).round();
     int scoreConfidence = ((avgWordsPerTurn * 3) + (longResponses * 4) + 55 - (fillerRatio * 100)).clamp(72.0, 97.0).round();
     int scoreRelevance = (82 + min(userCount, 10)).clamp(75, 96).toInt();
-    int scoreStructure = ((avgWordsPerTurn * 2.5) + 60).clamp(68.0, 92.0).round();
+    int scoreStructure = ((avgWordsPerTurn * 2.5) + (punctuationRatio * 20) + 50).clamp(68.0, 92.0).round();
     int scoreFillers = (100 - (fillerRatio * 400)).clamp(65.0, 98.0).round();
 
     List<ReportMetric> metrics = [];
@@ -318,56 +321,109 @@ class ReviewAnalyticsService {
     final double totalMetricSum = metrics.fold(0, (sum, m) => sum + m.score);
     final double overallScore = ((totalMetricSum / metrics.length) / 10.0 * 10).roundToDouble() / 10.0;
 
-    // Strengths
-    List<String> strengths = [
-      "Completed a comprehensive practice session with $userCount active user turns.",
-      "Maintained consistent engagement with an average response of ${avgWordsPerTurn.toStringAsFixed(1)} words per response.",
-    ];
-
-    if (vocabRichness > 0.45) {
-      strengths.add("Demonstrated diverse vocabulary usage across conversation turns.");
+    // Dynamic Strengths based strictly on conversation evidence
+    List<String> strengths = [];
+    if (avgWordsPerTurn >= 16) {
+      strengths.add(
+        "Demonstrated comprehensive elaboration with an average of ${avgWordsPerTurn.toStringAsFixed(0)} words per response.",
+      );
+    } else if (avgWordsPerTurn >= 10 && userCount >= 3) {
+      strengths.add(
+        "Maintained consistent conversational flow with well-sized responses across turns.",
+      );
     }
-    if (fillerRatio < 0.05) {
-      strengths.add("Exhibited strong control over filler words and speech pauses.");
+
+    if (vocabRichness >= 0.55 && totalWords >= 25) {
+      strengths.add(
+        "Demonstrated strong vocabulary variety across responses ($uniqueWords unique words used).",
+      );
     }
 
-    // Areas to improve
+    if (fillerRatio <= 0.02 && totalWords >= 20) {
+      strengths.add(
+        "Maintained clean speech delivery with minimal filler word hesitation.",
+      );
+    }
+
+    if (punctuationRatio >= 0.70 && userCount >= 2) {
+      strengths.add(
+        "Consistently constructed well-formed sentences with clear structure.",
+      );
+    }
+
+    if (questionsAsked >= 1) {
+      strengths.add(
+        "Took conversational initiative by asking relevant questions during the session.",
+      );
+    }
+
+    // Dynamic Areas to Improve - only added when evidence of an issue exists
     List<FeedbackItem> areasToImprove = [];
-    if (avgWordsPerTurn < 10) {
+    if (avgWordsPerTurn < 8) {
       areasToImprove.add(FeedbackItem(
-        category: "Response Depth",
-        description: "Expand your responses with more details and specific examples.",
-      ));
-    } else {
-      areasToImprove.add(FeedbackItem(
-        category: "Answer Structure",
-        description: "Organize main points systematically before speaking.",
+        category: "Response Elaboration",
+        description: "Responses were brief (averaging ${avgWordsPerTurn.toStringAsFixed(1)} words). Expand on your ideas with additional explanation or context.",
       ));
     }
 
-    if (fillerRatio >= 0.05) {
+    if (fillerRatio >= 0.04 && fillerCount > 0) {
+      final sampleFiller = detectedFillers.first;
       areasToImprove.add(FeedbackItem(
         category: "Filler Words",
-        description: "Minimize filler words ('like', 'um') for clearer speech delivery.",
-      ));
-    } else {
-      areasToImprove.add(FeedbackItem(
-        category: "Vocabulary Variety",
-        description: "Incorporate more domain-specific and descriptive terminology.",
+        description: "Detected frequent hesitation words ($fillerCount instances, including '$sampleFiller'). Strive for smoother transitions.",
       ));
     }
 
-    // Tips
-    List<ImprovementTipItem> tips = [
-      ImprovementTipItem(
-        category: "Structured Speaking",
-        tip: "Use clear intro-body-conclusion framing for elaborate responses.",
-      ),
-      ImprovementTipItem(
-        category: "Pacing & Clarity",
-        tip: "Pause briefly to structure thoughts instead of filling silence rapidly.",
-      ),
-    ];
+    if (vocabRichness < 0.40 && totalWords >= 20) {
+      areasToImprove.add(FeedbackItem(
+        category: "Vocabulary Range",
+        description: "Vocabulary showed repetitive word reuse. Practice incorporating a broader selection of descriptive terms.",
+      ));
+    }
+
+    if (punctuationRatio < 0.40 && userCount >= 2 && avgWordsPerTurn >= 5) {
+      areasToImprove.add(FeedbackItem(
+        category: "Sentence Formation",
+        description: "Several responses were sentence fragments lacking clear terminal punctuation or grammatical closure.",
+      ));
+    }
+
+    // Dynamic Actionable Tips - strictly paired to detected areas to improve
+    List<ImprovementTipItem> tips = [];
+    for (final area in areasToImprove) {
+      switch (area.category) {
+        case "Response Elaboration":
+          tips.add(ImprovementTipItem(
+            category: "Elaboration Technique",
+            tip: "Use the 'Point + Reason + Example' structure to reliably develop short answers into 2-3 full sentences.",
+          ));
+          break;
+        case "Filler Words":
+          tips.add(ImprovementTipItem(
+            category: "Pacing & Pauses",
+            tip: "Replace filler sounds ('um', 'like') with a deliberate 1-second silent pause before speaking.",
+          ));
+          break;
+        case "Vocabulary Range":
+          tips.add(ImprovementTipItem(
+            category: "Synonym Replacement",
+            tip: "Identify repetitive adjectives and actively replace them with more precise synonyms (e.g., 'crucial' or 'effective').",
+          ));
+          break;
+        case "Sentence Formation":
+          tips.add(ImprovementTipItem(
+            category: "Complete Sentences",
+            tip: "Practice framing answers with explicit Subject-Verb-Object structures rather than conversational shorthands.",
+          ));
+          break;
+        default:
+          tips.add(ImprovementTipItem(
+            category: area.category,
+            tip: "Focus on refining ${area.category.toLowerCase()} through targeted speaking drills.",
+          ));
+          break;
+      }
+    }
 
     return SessionReport(
       module: module,

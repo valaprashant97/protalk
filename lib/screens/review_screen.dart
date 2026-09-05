@@ -328,47 +328,53 @@ class ReviewScreen extends GetView<ReviewController> {
               ),
               const SizedBox(height: 24),
 
-              // Key Strengths Section
-              Text(
-                'KEY STRENGTHS',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.1,
-                  color: AppColors.getTextMuted(context),
+              // Key Strengths Section (dynamically displayed when strengths exist)
+              if (reportData.strengths.isNotEmpty) ...[
+                Text(
+                  'KEY STRENGTHS',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.1,
+                    color: AppColors.getTextMuted(context),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              ...reportData.strengths.map((strength) => _buildStrengthTile(context, strength)),
-              const SizedBox(height: 24),
+                const SizedBox(height: 12),
+                ...reportData.strengths.map((strength) => _buildStrengthTile(context, strength)),
+                const SizedBox(height: 24),
+              ],
 
-              // Areas to Improve Section
-              Text(
-                'AREAS TO IMPROVE',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.1,
-                  color: AppColors.getTextMuted(context),
+              // Areas to Improve Section (dynamically displayed when areas exist)
+              if (reportData.areasToImprove.isNotEmpty) ...[
+                Text(
+                  'AREAS TO IMPROVE',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.1,
+                    color: AppColors.getTextMuted(context),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              ...reportData.areasToImprove.map((item) => _buildAreaToImproveCard(context, item)),
-              const SizedBox(height: 24),
+                const SizedBox(height: 12),
+                ...reportData.areasToImprove.map((item) => _buildAreaToImproveCard(context, item)),
+                const SizedBox(height: 24),
+              ],
 
-              // Improvement Tips Section
-              Text(
-                'ACTIONABLE IMPROVEMENT TIPS',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.1,
-                  color: AppColors.getTextMuted(context),
+              // Improvement Tips Section (dynamically displayed when tips exist)
+              if (reportData.improvementTips.isNotEmpty) ...[
+                Text(
+                  'ACTIONABLE IMPROVEMENT TIPS',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.1,
+                    color: AppColors.getTextMuted(context),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              ...reportData.improvementTips.map((tipItem) => _buildImprovementTipCard(context, tipItem)),
-              const SizedBox(height: 32),
+                const SizedBox(height: 12),
+                ...reportData.improvementTips.map((tipItem) => _buildImprovementTipCard(context, tipItem)),
+                const SizedBox(height: 32),
+              ],
 
               // Action Buttons: New Chat & Remaining Chat
               Row(

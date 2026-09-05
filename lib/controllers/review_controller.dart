@@ -86,16 +86,17 @@ class ReviewController extends GetxController {
           .toList();
     }
 
-    // Check if report was already saved in SQLite database (only if new messages were not passed)
-    final hasNewMessagesPassed = sessionConfig['messages'] is List && (sessionConfig['messages'] as List).isNotEmpty;
-    if (!hasNewMessagesPassed && sessionId.isNotEmpty) {
+    // Check if report was already saved in SQLite database for this session
+    if (sessionId.isNotEmpty) {
       final savedReportModel = await DatabaseHelper.instance.getSessionReport(sessionId);
       if (savedReportModel != null) {
-        final cached = savedReportModel.toSessionReport();
-        final isEcho = (cached.overallScore == 8.2 || cached.overallScore == 8.5) &&
-            cached.strengths.any((s) => s.contains("Clear articulation") || s.contains("Engaging conversational flow"));
-        if (!isEcho) {
-          report.value = cached;
+        final savedMessageCount = savedReportModel.messageCount;
+        final currentMessageCount = conversationMessages.length;
+
+        // If the user hasn't sent new messages since the last review was saved,
+        // permanently show the same saved review without generating a new one
+        if (savedMessageCount > 0 && currentMessageCount <= savedMessageCount) {
+          report.value = savedReportModel.toSessionReport();
           isLoading.value = false;
           return;
         }
@@ -121,7 +122,7 @@ class ReviewController extends GetxController {
       report.value = generatedReport;
       isLoading.value = false;
 
-      // Save generated report to SQLite DB asynchronously
+      // Persist generated report to SQLite DB, replacing previous report for this session
       if (sessionId.isNotEmpty) {
         final model = SessionReportModel(
           sessionId: sessionId,
@@ -131,8 +132,9 @@ class ReviewController extends GetxController {
           strengths: generatedReport.strengths,
           areasToImprove: generatedReport.areasToImprove,
           improvementTips: generatedReport.improvementTips,
+          messageCount: conversationMessages.length,
         );
-        DatabaseHelper.instance.saveSessionReport(model).catchError((_) {});
+        await DatabaseHelper.instance.saveSessionReport(model);
       }
     } catch (e) {
       errorMessage.value = e.toString().replaceAll("Exception: ", "");

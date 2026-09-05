@@ -12,6 +12,7 @@ class SessionReportModel {
   final List<FeedbackItem> areasToImprove;
   final List<ImprovementTipItem> improvementTips;
   final DateTime createdAt;
+  final int messageCount;
 
   SessionReportModel({
     this.id,
@@ -23,7 +24,9 @@ class SessionReportModel {
     required this.areasToImprove,
     required this.improvementTips,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+    int? messageCount,
+  })  : createdAt = createdAt ?? DateTime.now(),
+        messageCount = messageCount ?? 0;
 
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{
@@ -35,6 +38,7 @@ class SessionReportModel {
       'areas_to_improve_json': jsonEncode(areasToImprove.map((a) => {'category': a.category, 'description': a.description}).toList()),
       'improvement_tips_json': jsonEncode(improvementTips.map((t) => {'category': t.category, 'tip': t.tip}).toList()),
       'created_at': createdAt.toIso8601String(),
+      'message_count': messageCount,
     };
     if (id != null) map['id'] = id;
     return map;
@@ -82,6 +86,7 @@ class SessionReportModel {
       areasToImprove: parsedAreas,
       improvementTips: parsedTips,
       createdAt: DateTime.tryParse(map['created_at'] ?? '') ?? DateTime.now(),
+      messageCount: (map['message_count'] as num? ?? 0).toInt(),
     );
   }
 
@@ -111,17 +116,32 @@ class ReviewReportTable {
         strengths_json TEXT NOT NULL,
         areas_to_improve_json TEXT NOT NULL,
         improvement_tips_json TEXT NOT NULL,
-        created_at TEXT NOT NULL
+        created_at TEXT NOT NULL,
+        message_count INTEGER DEFAULT 0
       )
     ''');
+
+    // Idempotent migration for existing database installations
+    try {
+      await db.execute('ALTER TABLE $tableName ADD COLUMN message_count INTEGER DEFAULT 0');
+    } catch (_) {
+      // Column already exists
+    }
   }
 
   static Future<void> insertReport(Database db, SessionReportModel report) async {
-    await db.insert(
-      tableName,
-      report.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.transaction((txn) async {
+      await txn.delete(
+        tableName,
+        where: 'session_id = ?',
+        whereArgs: [report.sessionId],
+      );
+      await txn.insert(
+        tableName,
+        report.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    });
   }
 
   static Future<SessionReportModel?> getReportForSession(Database db, String sessionId) async {
