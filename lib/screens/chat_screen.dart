@@ -181,7 +181,8 @@ class ChatScreen extends GetView<ChatController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     InkWell(
-                      onTap: () {
+                      onTap: () async {
+                        await _controller.stopSpeech();
                         Get.back();
                         _controller.startNewChat();
                       },
@@ -427,7 +428,8 @@ class ChatScreen extends GetView<ChatController> {
                       context,
                       Icons.settings_outlined,
                       "Settings",
-                      onTap: () {
+                      onTap: () async {
+                        await _controller.stopSpeech();
                         Get.back();
                         Get.toNamed(AppRoutes.settings);
                       },

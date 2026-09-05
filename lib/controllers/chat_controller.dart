@@ -14,7 +14,7 @@ import '../services/voice/text_to_speech.dart';
 
 export '../models/chat_message.dart';
 
-class ChatController extends GetxController {
+class ChatController extends GetxController with WidgetsBindingObserver {
   // GroqService object
   final GroqService _groqService = GroqService();
 
@@ -117,9 +117,12 @@ class ChatController extends GetxController {
     return selectedModulesList.join(' • ');
   }
 
+  bool _isAppMinimized = false;
+
   @override
   void onInit() {
     super.onInit();
+    WidgetsBinding.instance.addObserver(this);
     _loadRecentSessionsFromDb();
 
     // Reset speaking message whenever TTS stops speaking
@@ -254,12 +257,16 @@ class ChatController extends GetxController {
         messages.refresh();
         if (responseText.trim().isNotEmpty) {
           _saveMessageToDb(responseText, false);
-          currentState.value = VoiceState.aiSpeaking;
-          speakingMessage.value = updatedAiMsg;
-          await TextToSpeechService.instance.speak(
-            responseText,
-            onComplete: _onTtsComplete,
-          );
+          if (!_isAppMinimized) {
+            currentState.value = VoiceState.aiSpeaking;
+            speakingMessage.value = updatedAiMsg;
+            await TextToSpeechService.instance.speak(
+              responseText,
+              onComplete: _onTtsComplete,
+            );
+          } else {
+            currentState.value = VoiceState.idle;
+          }
         } else {
           _onTtsComplete();
         }
@@ -328,6 +335,7 @@ class ChatController extends GetxController {
 
   // Start recording audio via microphone
   Future<void> startListening() async {
+    if (_isAppMinimized) return;
     if (_isStartingListening) return;
     _isStartingListening = true;
 
@@ -491,12 +499,16 @@ class ChatController extends GetxController {
         messages.refresh();
         if (responseText.trim().isNotEmpty) {
           _saveMessageToDb(responseText, false);
-          currentState.value = VoiceState.aiSpeaking;
-          speakingMessage.value = updatedAiMsg;
-          await TextToSpeechService.instance.speak(
-            responseText,
-            onComplete: _onTtsComplete,
-          );
+          if (!_isAppMinimized) {
+            currentState.value = VoiceState.aiSpeaking;
+            speakingMessage.value = updatedAiMsg;
+            await TextToSpeechService.instance.speak(
+              responseText,
+              onComplete: _onTtsComplete,
+            );
+          } else {
+            currentState.value = VoiceState.idle;
+          }
         } else {
           _onTtsComplete();
         }
@@ -520,7 +532,7 @@ class ChatController extends GetxController {
 
   /// Speaks an AI message using centralized TTS service, or toggles playback off if already speaking
   Future<void> replayAiMessage(ChatMessage message) async {
-    if (message.text.trim().isEmpty) return;
+    if (_isAppMinimized || message.text.trim().isEmpty) return;
 
     if (speakingMessage.value == message && TextToSpeechService.instance.isSpeaking.value) {
       await TextToSpeechService.instance.stop();
@@ -711,8 +723,22 @@ class ChatController extends GetxController {
     });
   }
 
+  /// Immediately stops/cancels ongoing AI speech playback and resets speaking state
+  Future<void> stopSpeech() async {
+    speakingMessage.value = null;
+    if (currentState.value == VoiceState.aiSpeaking) {
+      currentState.value = VoiceState.idle;
+    }
+    try {
+      await TextToSpeechService.instance.stop();
+    } catch (e) {
+      debugPrint('Error stopping speech: $e');
+    }
+  }
+
   /// New chat
   void startNewChat() {
+    stopSpeech();
     stopListening();
     try {
       _audioRecorder.stopRecording();
@@ -861,7 +887,34 @@ class ChatController extends GetxController {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.hidden) {
+      _isAppMinimized = true;
+      _handleAppMinimized();
+    } else if (state == AppLifecycleState.resumed) {
+      _isAppMinimized = false;
+    }
+  }
+
+  /// Stops and cancels ongoing speech and recording when the app is minimized
+  void _handleAppMinimized() {
+    stopSpeech();
+    if (currentState.value == VoiceState.listening) {
+      stopListening();
+      try {
+        _audioRecorder.cancelRecording();
+      } catch (_) {}
+      liveSpeech.value = "";
+      currentState.value = VoiceState.idle;
+    }
+  }
+
+  @override
   void onClose() {
+    WidgetsBinding.instance.removeObserver(this);
     TextToSpeechService.instance.stop();
     speakingMessage.value = null;
     _audioRecorder.dispose();

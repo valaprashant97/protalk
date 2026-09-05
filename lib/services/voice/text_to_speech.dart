@@ -1,12 +1,13 @@
 import 'dart:async';
 import 'dart:developer' as developer;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'female_voice.dart';
 import 'male_voice.dart';
 
-class TextToSpeechService {
+class TextToSpeechService with WidgetsBindingObserver {
   TextToSpeechService._internal();
   static final TextToSpeechService instance = TextToSpeechService._internal();
 
@@ -21,6 +22,8 @@ class TextToSpeechService {
   final RxMap<String, String> activeVoice = <String, String>{}.obs;
   final RxBool isGenderVerified = false.obs;
   final RxString genderStatusLabel = ''.obs;
+
+  bool isAppInBackground = false;
 
   final RxList<Map<String, String>> availableVoices = <Map<String, String>>[].obs;
 
@@ -38,6 +41,7 @@ class TextToSpeechService {
     if (isInitialized.value) return;
 
     try {
+      WidgetsBinding.instance.addObserver(this);
       // Enable awaiting speak completion for reliable completion tracking
       await _flutterTts.awaitSpeakCompletion(true);
 
@@ -143,7 +147,7 @@ class TextToSpeechService {
 
   /// Speaks text after stopping any currently active audio
   Future<void> speak(String text, {void Function()? onComplete}) async {
-    if (text.trim().isEmpty) {
+    if (isAppInBackground || text.trim().isEmpty) {
       onComplete?.call();
       return;
     }
@@ -192,6 +196,20 @@ class TextToSpeechService {
         _onSpeechCompleted = null;
         callback();
       }
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.hidden) {
+      isAppInBackground = true;
+      if (isSpeaking.value) {
+        stop(triggerCallback: false);
+      }
+    } else if (state == AppLifecycleState.resumed) {
+      isAppInBackground = false;
     }
   }
 
